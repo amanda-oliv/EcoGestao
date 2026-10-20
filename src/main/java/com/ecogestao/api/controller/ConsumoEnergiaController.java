@@ -1,5 +1,6 @@
 package com.ecogestao.api.controller;
 
+import com.ecogestao.api.exception.RecursoNaoEncontradoException;
 import com.ecogestao.api.model.ConsumoEnergia;
 import com.ecogestao.api.service.ConsumoEnergiaService;
 import jakarta.validation.Valid;
@@ -41,14 +42,15 @@ public class ConsumoEnergiaController {
     public ResponseEntity<ConsumoEnergia> buscarPorId(@PathVariable Long id) {
         return consumoEnergiaService.buscarPorId(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> naoEncontrado(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ConsumoEnergia> atualizar(@PathVariable Long id, @Valid @RequestBody ConsumoEnergia consumo) {
+    public ResponseEntity<ConsumoEnergia> atualizar(@PathVariable Long id,
+                                                    @Valid @RequestBody ConsumoEnergia consumo) {
         ConsumoEnergia atualizado = consumoEnergiaService.atualizar(id, consumo);
         if (atualizado == null) {
-            return ResponseEntity.notFound().build();
+            throw naoEncontrado(id);
         }
         return ResponseEntity.ok(atualizado);
     }
@@ -56,9 +58,14 @@ public class ConsumoEnergiaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         if (consumoEnergiaService.buscarPorId(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
+            throw naoEncontrado(id);
         }
         consumoEnergiaService.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private RecursoNaoEncontradoException naoEncontrado(Long id) {
+        return new RecursoNaoEncontradoException(
+                "Consumo de energia com id " + id + " não encontrado");
     }
 }

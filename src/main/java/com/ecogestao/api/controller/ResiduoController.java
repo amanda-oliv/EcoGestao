@@ -1,5 +1,6 @@
 package com.ecogestao.api.controller;
 
+import com.ecogestao.api.exception.RecursoNaoEncontradoException;
 import com.ecogestao.api.model.Residuo;
 import com.ecogestao.api.service.ResiduoService;
 import jakarta.validation.Valid;
@@ -41,7 +42,7 @@ public class ResiduoController {
     public ResponseEntity<Residuo> buscarPorId(@PathVariable Long id) {
         return residuoService.buscarPorId(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> naoEncontrado(id));
     }
 
     @PutMapping("/{id}")
@@ -49,7 +50,7 @@ public class ResiduoController {
                                              @Valid @RequestBody Residuo residuo) {
         Residuo atualizado = residuoService.atualizar(id, residuo);
         if (atualizado == null) {
-            return ResponseEntity.notFound().build();
+            throw naoEncontrado(id);
         }
         return ResponseEntity.ok(atualizado);
     }
@@ -57,9 +58,14 @@ public class ResiduoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         if (residuoService.buscarPorId(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
+            throw naoEncontrado(id);
         }
         residuoService.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private RecursoNaoEncontradoException naoEncontrado(Long id) {
+        return new RecursoNaoEncontradoException(
+                "Resíduo com id " + id + " não encontrado");
     }
 }

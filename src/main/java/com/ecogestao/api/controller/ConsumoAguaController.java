@@ -1,5 +1,6 @@
 package com.ecogestao.api.controller;
 
+import com.ecogestao.api.exception.RecursoNaoEncontradoException;
 import com.ecogestao.api.model.ConsumoAgua;
 import com.ecogestao.api.service.ConsumoAguaService;
 import jakarta.validation.Valid;
@@ -19,14 +20,12 @@ public class ConsumoAguaController {
     @Autowired
     private ConsumoAguaService consumoAguaService;
 
-    // POST /api/agua
     @PostMapping
     public ResponseEntity<ConsumoAgua> cadastrar(@Valid @RequestBody ConsumoAgua consumo) {
         ConsumoAgua salvo = consumoAguaService.salvar(consumo);
         return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
-    // GET /api/agua  (lista, com filtros opcionais: setorId, dataInicio, dataFim)
     @GetMapping
     public ResponseEntity<List<ConsumoAgua>> listar(
             @RequestParam(name = "setorId", required = false) Long setorId,
@@ -39,31 +38,34 @@ public class ConsumoAguaController {
                 consumoAguaService.listarComFiltros(setorId, dataInicio, dataFim));
     }
 
-    // GET /api/agua/{id}  (por id)
     @GetMapping("/{id}")
     public ResponseEntity<ConsumoAgua> buscarPorId(@PathVariable Long id) {
         return consumoAguaService.buscarPorId(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> naoEncontrado(id));
     }
 
-    // PUT /api/agua/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<ConsumoAgua> atualizar(@PathVariable Long id, @Valid @RequestBody ConsumoAgua consumo) {
+    public ResponseEntity<ConsumoAgua> atualizar(@PathVariable Long id,
+                                                 @Valid @RequestBody ConsumoAgua consumo) {
         ConsumoAgua atualizado = consumoAguaService.atualizar(id, consumo);
         if (atualizado == null) {
-            return ResponseEntity.notFound().build();
+            throw naoEncontrado(id);
         }
         return ResponseEntity.ok(atualizado);
     }
 
-    // DELETE /api/agua/{id}
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         if (consumoAguaService.buscarPorId(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
+            throw naoEncontrado(id);
         }
         consumoAguaService.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private RecursoNaoEncontradoException naoEncontrado(Long id) {
+        return new RecursoNaoEncontradoException(
+                "Consumo de água com id " + id + " não encontrado");
     }
 }

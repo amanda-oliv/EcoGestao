@@ -1,6 +1,8 @@
 package com.ecogestao.api.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "setor")
@@ -10,9 +12,12 @@ public class Setor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "O nome do setor é obrigatório")
+    @Size(max = 100, message = "O nome do setor deve ter no máximo 100 caracteres")
     @Column(nullable = false, length = 100)
     private String nome;
 
+    @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres")
     @Column(length = 255)
     private String descricao;
 
