@@ -1,0 +1,9 @@
+$kind: collection
+description: "Collection da API REST do EcoGestão (Spring Boot + MySQL). Rode a pasta inteira no Collection Runner, na ordem: Setores → Água → Energia → Resíduos → Dashboard → Erros. O POST de cada módulo salva o id em variável de collection, usada pelos pedidos seguintes."
+variables:
+  baseUrl: http://localhost:8080
+  setorId: ""
+  aguaId: ""
+  energiaId: ""
+  residuoId: ""
+  residuoId2: ""

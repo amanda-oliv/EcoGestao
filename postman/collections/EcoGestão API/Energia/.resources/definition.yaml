@@ -1,0 +1,3 @@
+$kind: collection
+description: CRUD, filtros e validações de /api/energia (kWh).
+order: 3000

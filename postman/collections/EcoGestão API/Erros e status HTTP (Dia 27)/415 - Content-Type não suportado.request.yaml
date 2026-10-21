@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/agua"
+method: POST
+headers:
+  Content-Type: text/plain
+body:
+  type: text
+  content: texto
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 415", function () { pm.response.to.have.status(415); });
+      pm.test("Status 415 com JSON", function () { pm.expect(pm.response.json().status).to.eql(415); });
+    language: text/javascript
+order: 13000

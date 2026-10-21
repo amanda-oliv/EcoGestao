@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/api/energia"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "setor": { "id": 999999 },
+      "data": "2026-10-01",
+      "quantidade": 100.00
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 404", function () { pm.response.to.have.status(404); });
+      var j = pm.response.json();
+      pm.test("Corpo de erro padronizado", function () { pm.expect(j).to.have.keys("timestamp","status","erro","mensagem"); pm.expect(j.status).to.eql(pm.response.code); });
+      pm.test("Categoria: Recurso não encontrado", function () { pm.expect(j.erro).to.eql("Recurso não encontrado"); });
+    language: text/javascript
+order: 10000

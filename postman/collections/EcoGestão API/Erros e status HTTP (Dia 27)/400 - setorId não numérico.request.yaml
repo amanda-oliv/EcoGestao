@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/energia?setorId=abc"
+method: GET
+queryParams:
+  setorId: abc
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 400", function () { pm.response.to.have.status(400); });
+      var j = pm.response.json();
+      pm.test("Corpo de erro padronizado", function () { pm.expect(j).to.have.keys("timestamp","status","erro","mensagem"); pm.expect(j.status).to.eql(pm.response.code); });
+      pm.test("Categoria: Parâmetro inválido", function () { pm.expect(j.erro).to.eql("Parâmetro inválido"); });
+    language: text/javascript
+order: 7000

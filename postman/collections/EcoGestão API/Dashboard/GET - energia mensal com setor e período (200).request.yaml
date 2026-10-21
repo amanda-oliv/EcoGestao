@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/dashboard/energia-mensal?setorId={{setorId}}&dataInicio=2026-10-01&dataFim=2026-10-31"
+method: GET
+queryParams:
+  setorId: "{{setorId}}"
+  dataInicio: 2026-10-01
+  dataFim: 2026-10-31
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 200", function () { pm.response.to.have.status(200); });
+      pm.test("Resposta é uma lista", function () { pm.expect(pm.response.json()).to.be.an("array"); });
+      pm.test("Itens com rótulo e total", function () { pm.response.json().forEach(function (i) { pm.expect(i).to.have.keys("ano","mes","rotulo","total"); }); });
+    language: text/javascript
+order: 4000

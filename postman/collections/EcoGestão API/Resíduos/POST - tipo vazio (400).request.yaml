@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/api/residuos"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "setor": { "id": {{setorId}} },
+      "data": "2026-10-01",
+      "tipo": "",
+      "quantidade": 10.00,
+      "destinacao": "Reciclagem"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 400", function () { pm.response.to.have.status(400); });
+      var j = pm.response.json();
+      pm.test("Corpo de erro padronizado", function () { pm.expect(j).to.have.keys("timestamp","status","erro","mensagem"); pm.expect(j.status).to.eql(pm.response.code); });
+      pm.test("Categoria: Erro de validação", function () { pm.expect(j.erro).to.eql("Erro de validação"); });
+    language: text/javascript
+order: 12000

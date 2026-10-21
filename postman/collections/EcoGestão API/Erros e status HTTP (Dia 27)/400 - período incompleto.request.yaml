@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/agua?dataInicio=2026-10-01"
+method: GET
+queryParams:
+  dataInicio: 2026-10-01
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 400", function () { pm.response.to.have.status(400); });
+      var j = pm.response.json();
+      pm.test("Corpo de erro padronizado", function () { pm.expect(j).to.have.keys("timestamp","status","erro","mensagem"); pm.expect(j.status).to.eql(pm.response.code); });
+      pm.test("Categoria: Valor inválido", function () { pm.expect(j.erro).to.eql("Valor inválido"); });
+    language: text/javascript
+order: 9000

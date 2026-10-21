@@ -1,0 +1,2810 @@
+{
+  "info": {
+    "name": "EcoGestão API",
+    "description": "Collection da API REST do EcoGestão (Spring Boot + MySQL). Rode a pasta inteira no Collection Runner, na ordem: Setores → Água → Energia → Resíduos → Dashboard → Erros. O POST de cada módulo salva o id em variável de collection, usada pelos pedidos seguintes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "setorId",
+      "value": ""
+    },
+    {
+      "key": "aguaId",
+      "value": ""
+    },
+    {
+      "key": "energiaId",
+      "value": ""
+    },
+    {
+      "key": "residuoId",
+      "value": ""
+    },
+    {
+      "key": "residuoId2",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Setores",
+      "description": "Cadastro de setores (pré-requisito dos demais módulos).",
+      "item": [
+        {
+          "name": "POST - cadastrar setor (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"setorId\", pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/setores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "setores"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Produção\",\n  \"descricao\": \"Setor de produção\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET - listar setores (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/setores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "setores"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - setor por id (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/setores/{{setorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "setores",
+                "{{setorId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - setor inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Recurso não encontrado\", function () { pm.expect(j.erro).to.eql(\"Recurso não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/setores/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "setores",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST - setor sem nome (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Erro de validação\", function () { pm.expect(j.erro).to.eql(\"Erro de validação\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/setores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "setores"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Sem nome\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Água",
+      "description": "CRUD, filtros e validações de /api/agua (litros).",
+      "item": [
+        {
+          "name": "POST - cadastrar (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"aguaId\", pm.response.json().id); }",
+                  "pm.test(\"Quantidade gravada\", function () { pm.expect(pm.response.json().quantidade).to.eql(150); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2026-10-01\",\n  \"quantidade\": 150.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET - listar todos (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - por id (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua/{{aguaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua",
+                "{{aguaId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - filtro por período (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua?dataInicio=2026-10-01&dataFim=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ],
+              "query": [
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - filtro por setor (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua?setorId={{setorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ],
+              "query": [
+                {
+                  "key": "setorId",
+                  "value": "{{setorId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - filtro combinado setor + período (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua?setorId={{setorId}}&dataInicio=2026-10-01&dataFim=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ],
+              "query": [
+                {
+                  "key": "setorId",
+                  "value": "{{setorId}}"
+                },
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT - atualizar (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Quantidade atualizada\", function () { pm.expect(pm.response.json().quantidade).to.eql(175.5); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua/{{aguaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua",
+                "{{aguaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2026-10-15\",\n  \"quantidade\": 175.50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST - quantidade negativa (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Erro de validação\", function () { pm.expect(j.erro).to.eql(\"Erro de validação\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2026-10-01\",\n  \"quantidade\": -10.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST - data futura (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Erro de validação\", function () { pm.expect(j.erro).to.eql(\"Erro de validação\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2099-01-01\",\n  \"quantidade\": 100.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST - setor inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Recurso não encontrado\", function () { pm.expect(j.erro).to.eql(\"Recurso não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": 999999 },\n  \"data\": \"2026-10-01\",\n  \"quantidade\": 100.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET - id inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Recurso não encontrado\", function () { pm.expect(j.erro).to.eql(\"Recurso não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE - excluir (204)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua/{{aguaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua",
+                "{{aguaId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - por id após exclusão (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Recurso não encontrado\", function () { pm.expect(j.erro).to.eql(\"Recurso não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua/{{aguaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua",
+                "{{aguaId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE - repetido (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Recurso não encontrado\", function () { pm.expect(j.erro).to.eql(\"Recurso não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua/{{aguaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua",
+                "{{aguaId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Energia",
+      "description": "CRUD, filtros e validações de /api/energia (kWh).",
+      "item": [
+        {
+          "name": "POST - cadastrar (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"energiaId\", pm.response.json().id); }",
+                  "pm.test(\"Quantidade gravada\", function () { pm.expect(pm.response.json().quantidade).to.eql(150); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2026-10-01\",\n  \"quantidade\": 150.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET - listar todos (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - por id (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia/{{energiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia",
+                "{{energiaId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - filtro por período (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia?dataInicio=2026-10-01&dataFim=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia"
+              ],
+              "query": [
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - filtro por setor (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia?setorId={{setorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia"
+              ],
+              "query": [
+                {
+                  "key": "setorId",
+                  "value": "{{setorId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - filtro combinado setor + período (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia?setorId={{setorId}}&dataInicio=2026-10-01&dataFim=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia"
+              ],
+              "query": [
+                {
+                  "key": "setorId",
+                  "value": "{{setorId}}"
+                },
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT - atualizar (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Quantidade atualizada\", function () { pm.expect(pm.response.json().quantidade).to.eql(175.5); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia/{{energiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia",
+                "{{energiaId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2026-10-15\",\n  \"quantidade\": 175.50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST - quantidade negativa (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Erro de validação\", function () { pm.expect(j.erro).to.eql(\"Erro de validação\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2026-10-01\",\n  \"quantidade\": -10.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST - data futura (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Erro de validação\", function () { pm.expect(j.erro).to.eql(\"Erro de validação\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2099-01-01\",\n  \"quantidade\": 100.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST - setor inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Recurso não encontrado\", function () { pm.expect(j.erro).to.eql(\"Recurso não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": 999999 },\n  \"data\": \"2026-10-01\",\n  \"quantidade\": 100.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET - id inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Recurso não encontrado\", function () { pm.expect(j.erro).to.eql(\"Recurso não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE - excluir (204)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia/{{energiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia",
+                "{{energiaId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - por id após exclusão (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Recurso não encontrado\", function () { pm.expect(j.erro).to.eql(\"Recurso não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia/{{energiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia",
+                "{{energiaId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE - repetido (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Recurso não encontrado\", function () { pm.expect(j.erro).to.eql(\"Recurso não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia/{{energiaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia",
+                "{{energiaId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Resíduos",
+      "description": "CRUD, filtros e validações de /api/residuos (kg), incluindo tipo e destinacao.",
+      "item": [
+        {
+          "name": "POST - cadastrar (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "if (pm.response.code === 201) { pm.collectionVariables.set(\"residuoId\", pm.response.json().id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2026-10-01\",\n  \"tipo\": \"Papel\",\n  \"quantidade\": 45.50,\n  \"destinacao\": \"Reciclagem\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST - grafia diferente é padronizada (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", function () { pm.response.to.have.status(201); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Gravado na grafia oficial\", function () { pm.expect(j.tipo).to.eql(\"Plástico\"); pm.expect(j.destinacao).to.eql(\"Reciclagem\"); });",
+                  "pm.collectionVariables.set(\"residuoId2\", j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2026-10-01\",\n  \"tipo\": \"plástico\",\n  \"quantidade\": 12.00,\n  \"destinacao\": \"RECICLAGEM\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET - listar todos (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - por id (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos/{{residuoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos",
+                "{{residuoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - filtro por período (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos?dataInicio=2026-10-01&dataFim=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos"
+              ],
+              "query": [
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - filtro por setor (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos?setorId={{setorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos"
+              ],
+              "query": [
+                {
+                  "key": "setorId",
+                  "value": "{{setorId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - filtro combinado setor + período (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos?setorId={{setorId}}&dataInicio=2026-10-01&dataFim=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos"
+              ],
+              "query": [
+                {
+                  "key": "setorId",
+                  "value": "{{setorId}}"
+                },
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT - atualizar (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Dados atualizados\", function () { pm.expect(j.tipo).to.eql(\"Vidro\"); pm.expect(j.destinacao).to.eql(\"Aterro\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos/{{residuoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos",
+                "{{residuoId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2026-10-15\",\n  \"tipo\": \"Vidro\",\n  \"quantidade\": 30.00,\n  \"destinacao\": \"Aterro\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST - tipo fora da lista (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Valor inválido\", function () { pm.expect(j.erro).to.eql(\"Valor inválido\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2026-10-01\",\n  \"tipo\": \"Madeira\",\n  \"quantidade\": 10.00,\n  \"destinacao\": \"Reciclagem\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST - destinação fora da lista (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Valor inválido\", function () { pm.expect(j.erro).to.eql(\"Valor inválido\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2026-10-01\",\n  \"tipo\": \"Papel\",\n  \"quantidade\": 10.00,\n  \"destinacao\": \"Lixão\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST - quantidade negativa (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Erro de validação\", function () { pm.expect(j.erro).to.eql(\"Erro de validação\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2026-10-01\",\n  \"tipo\": \"Papel\",\n  \"quantidade\": -5.00,\n  \"destinacao\": \"Reciclagem\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST - tipo vazio (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Erro de validação\", function () { pm.expect(j.erro).to.eql(\"Erro de validação\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": {{setorId}} },\n  \"data\": \"2026-10-01\",\n  \"tipo\": \"\",\n  \"quantidade\": 10.00,\n  \"destinacao\": \"Reciclagem\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST - setor inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Recurso não encontrado\", function () { pm.expect(j.erro).to.eql(\"Recurso não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setor\": { \"id\": 999999 },\n  \"data\": \"2026-10-01\",\n  \"tipo\": \"Papel\",\n  \"quantidade\": 10.00,\n  \"destinacao\": \"Reciclagem\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET - id inexistente (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Recurso não encontrado\", function () { pm.expect(j.erro).to.eql(\"Recurso não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE - excluir (204)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos/{{residuoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos",
+                "{{residuoId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE - excluir segundo registro (204)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos/{{residuoId2}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos",
+                "{{residuoId2}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - por id após exclusão (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Recurso não encontrado\", function () { pm.expect(j.erro).to.eql(\"Recurso não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos/{{residuoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos",
+                "{{residuoId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "description": "Endpoints agregados para os gráficos do frontend.",
+      "item": [
+        {
+          "name": "GET - água mensal (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/agua-mensal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "agua-mensal"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - água mensal com setor e período (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });",
+                  "pm.test(\"Itens com rótulo e total\", function () { pm.response.json().forEach(function (i) { pm.expect(i).to.have.keys(\"ano\",\"mes\",\"rotulo\",\"total\"); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/agua-mensal?setorId={{setorId}}&dataInicio=2026-10-01&dataFim=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "agua-mensal"
+              ],
+              "query": [
+                {
+                  "key": "setorId",
+                  "value": "{{setorId}}"
+                },
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - energia mensal (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/energia-mensal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "energia-mensal"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - energia mensal com setor e período (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });",
+                  "pm.test(\"Itens com rótulo e total\", function () { pm.response.json().forEach(function (i) { pm.expect(i).to.have.keys(\"ano\",\"mes\",\"rotulo\",\"total\"); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/energia-mensal?setorId={{setorId}}&dataInicio=2026-10-01&dataFim=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "energia-mensal"
+              ],
+              "query": [
+                {
+                  "key": "setorId",
+                  "value": "{{setorId}}"
+                },
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - resíduos mensal (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/residuos-mensal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "residuos-mensal"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - resíduos mensal com setor e período (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });",
+                  "pm.test(\"Itens com rótulo e total\", function () { pm.response.json().forEach(function (i) { pm.expect(i).to.have.keys(\"ano\",\"mes\",\"rotulo\",\"total\"); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/residuos-mensal?setorId={{setorId}}&dataInicio=2026-10-01&dataFim=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "residuos-mensal"
+              ],
+              "query": [
+                {
+                  "key": "setorId",
+                  "value": "{{setorId}}"
+                },
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - reciclagem (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Campos de reciclagem\", function () { pm.expect(pm.response.json()).to.have.keys(\"totalGerado\",\"totalReciclado\",\"totalNaoReciclado\",\"percentualReciclagem\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/reciclagem",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "reciclagem"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - reciclagem com setor e período (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/reciclagem?setorId={{setorId}}&dataInicio=2026-10-01&dataFim=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "reciclagem"
+              ],
+              "query": [
+                {
+                  "key": "setorId",
+                  "value": "{{setorId}}"
+                },
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - consumo por setor (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });",
+                  "pm.test(\"Itens por setor\", function () { pm.response.json().forEach(function (i) { pm.expect(i).to.have.keys(\"setorId\",\"setor\",\"agua\",\"energia\",\"residuos\"); }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/consumo-por-setor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "consumo-por-setor"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET - consumo por setor com período (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Resposta é uma lista\", function () { pm.expect(pm.response.json()).to.be.an(\"array\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/consumo-por-setor?dataInicio=2026-10-01&dataFim=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "consumo-por-setor"
+              ],
+              "query": [
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-31"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Erros e status HTTP (Dia 27)",
+      "description": "Cenários de erro que validam códigos de status e o formato único de resposta de erro.",
+      "item": [
+        {
+          "name": "405 - DELETE em endpoint só de leitura",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 405\", function () { pm.response.to.have.status(405); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Método não permitido\", function () { pm.expect(j.erro).to.eql(\"Método não permitido\"); });",
+                  "pm.test(\"Header Allow presente\", function () { pm.response.to.have.header(\"Allow\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/agua-mensal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "agua-mensal"
+              ]
+            }
+          }
+        },
+        {
+          "name": "405 - PATCH em /api/agua/{id}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 405\", function () { pm.response.to.have.status(405); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Método não permitido\", function () { pm.expect(j.erro).to.eql(\"Método não permitido\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "404 - rota inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Endereço não encontrado\", function () { pm.expect(j.erro).to.eql(\"Endereço não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inexistente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inexistente"
+              ]
+            }
+          }
+        },
+        {
+          "name": "400 - JSON malformado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Requisição inválida\", function () { pm.expect(j.erro).to.eql(\"Requisição inválida\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ isto não é json",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "400 - data inválida no corpo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Requisição inválida\", function () { pm.expect(j.erro).to.eql(\"Requisição inválida\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"setor\":{\"id\":1},\"data\":\"2024-13-45\",\"quantidade\":10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "400 - parâmetro dataInicio inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Parâmetro inválido\", function () { pm.expect(j.erro).to.eql(\"Parâmetro inválido\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua?dataInicio=abc&dataFim=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ],
+              "query": [
+                {
+                  "key": "dataInicio",
+                  "value": "abc"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "400 - setorId não numérico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Parâmetro inválido\", function () { pm.expect(j.erro).to.eql(\"Parâmetro inválido\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia?setorId=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia"
+              ],
+              "query": [
+                {
+                  "key": "setorId",
+                  "value": "abc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "400 - id não numérico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Parâmetro inválido\", function () { pm.expect(j.erro).to.eql(\"Parâmetro inválido\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/residuos/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "residuos",
+                "abc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "400 - período incompleto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Valor inválido\", function () { pm.expect(j.erro).to.eql(\"Valor inválido\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua?dataInicio=2026-10-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ],
+              "query": [
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-01"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "400 - intervalo invertido (listagem)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Valor inválido\", function () { pm.expect(j.erro).to.eql(\"Valor inválido\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/energia?dataInicio=2026-10-31&dataFim=2026-10-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "energia"
+              ],
+              "query": [
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-31"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-01"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "400 - intervalo invertido (dashboard)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", function () { pm.response.to.have.status(400); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Valor inválido\", function () { pm.expect(j.erro).to.eql(\"Valor inválido\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/reciclagem?dataInicio=2026-10-31&dataFim=2026-10-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dashboard",
+                "reciclagem"
+              ],
+              "query": [
+                {
+                  "key": "dataInicio",
+                  "value": "2026-10-31"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "2026-10-01"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "404 - setor inexistente no filtro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", function () { pm.response.to.have.status(404); });",
+                  "var j = pm.response.json();",
+                  "pm.test(\"Corpo de erro padronizado\", function () { pm.expect(j).to.have.keys(\"timestamp\",\"status\",\"erro\",\"mensagem\"); pm.expect(j.status).to.eql(pm.response.code); });",
+                  "pm.test(\"Categoria: Recurso não encontrado\", function () { pm.expect(j.erro).to.eql(\"Recurso não encontrado\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua?setorId=999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ],
+              "query": [
+                {
+                  "key": "setorId",
+                  "value": "999999"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "415 - Content-Type não suportado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 415\", function () { pm.response.to.have.status(415); });",
+                  "pm.test(\"Status 415 com JSON\", function () { pm.expect(pm.response.json().status).to.eql(415); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/plain"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/agua",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "agua"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "texto"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

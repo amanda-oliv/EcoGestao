@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{baseUrl}}/api/setores"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "nome": "Produção",
+      "descricao": "Setor de produção"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 201", function () { pm.response.to.have.status(201); });
+      if (pm.response.code === 201) { pm.collectionVariables.set("setorId", pm.response.json().id); }
+    language: text/javascript
+order: 1000

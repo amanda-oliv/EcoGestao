@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/api/energia/{{energiaId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "setor": { "id": {{setorId}} },
+      "data": "2026-10-15",
+      "quantidade": 175.50
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 200", function () { pm.response.to.have.status(200); });
+      pm.test("Quantidade atualizada", function () { pm.expect(pm.response.json().quantidade).to.eql(175.5); });
+    language: text/javascript
+order: 7000

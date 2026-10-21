@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/api/agua"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{ isto não é json"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 400", function () { pm.response.to.have.status(400); });
+      var j = pm.response.json();
+      pm.test("Corpo de erro padronizado", function () { pm.expect(j).to.have.keys("timestamp","status","erro","mensagem"); pm.expect(j.status).to.eql(pm.response.code); });
+      pm.test("Categoria: Requisição inválida", function () { pm.expect(j.erro).to.eql("Requisição inválida"); });
+    language: text/javascript
+order: 4000

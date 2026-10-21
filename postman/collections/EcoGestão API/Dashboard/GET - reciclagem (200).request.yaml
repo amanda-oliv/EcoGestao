@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{baseUrl}}/api/dashboard/reciclagem"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 200", function () { pm.response.to.have.status(200); });
+      pm.test("Campos de reciclagem", function () { pm.expect(pm.response.json()).to.have.keys("totalGerado","totalReciclado","totalNaoReciclado","percentualReciclagem"); });
+    language: text/javascript
+order: 7000

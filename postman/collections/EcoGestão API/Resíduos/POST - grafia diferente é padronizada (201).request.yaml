@@ -1,0 +1,24 @@
+$kind: http-request
+url: "{{baseUrl}}/api/residuos"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "setor": { "id": {{setorId}} },
+      "data": "2026-10-01",
+      "tipo": "plástico",
+      "quantidade": 12.00,
+      "destinacao": "RECICLAGEM"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 201", function () { pm.response.to.have.status(201); });
+      var j = pm.response.json();
+      pm.test("Gravado na grafia oficial", function () { pm.expect(j.tipo).to.eql("Plástico"); pm.expect(j.destinacao).to.eql("Reciclagem"); });
+      pm.collectionVariables.set("residuoId2", j.id);
+    language: text/javascript
+order: 2000

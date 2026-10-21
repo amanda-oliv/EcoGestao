@@ -1,0 +1,3 @@
+$kind: collection
+description: Cenários de erro que validam códigos de status e o formato único de resposta de erro.
+order: 6000

@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/dashboard/agua-mensal"
+method: DELETE
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 405", function () { pm.response.to.have.status(405); });
+      var j = pm.response.json();
+      pm.test("Corpo de erro padronizado", function () { pm.expect(j).to.have.keys("timestamp","status","erro","mensagem"); pm.expect(j.status).to.eql(pm.response.code); });
+      pm.test("Categoria: Método não permitido", function () { pm.expect(j.erro).to.eql("Método não permitido"); });
+      pm.test("Header Allow presente", function () { pm.response.to.have.header("Allow"); });
+    language: text/javascript
+order: 1000

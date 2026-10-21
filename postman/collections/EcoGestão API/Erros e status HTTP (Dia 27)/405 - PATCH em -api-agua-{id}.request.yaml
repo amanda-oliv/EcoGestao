@@ -1,0 +1,13 @@
+$kind: http-request
+name: 405 - PATCH em /api/agua/{id}
+url: "{{baseUrl}}/api/agua/1"
+method: PATCH
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 405", function () { pm.response.to.have.status(405); });
+      var j = pm.response.json();
+      pm.test("Corpo de erro padronizado", function () { pm.expect(j).to.have.keys("timestamp","status","erro","mensagem"); pm.expect(j.status).to.eql(pm.response.code); });
+      pm.test("Categoria: Método não permitido", function () { pm.expect(j.erro).to.eql("Método não permitido"); });
+    language: text/javascript
+order: 2000

@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/residuos/{{residuoId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "setor": { "id": {{setorId}} },
+      "data": "2026-10-15",
+      "tipo": "Vidro",
+      "quantidade": 30.00,
+      "destinacao": "Aterro"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 200", function () { pm.response.to.have.status(200); });
+      var j = pm.response.json();
+      pm.test("Dados atualizados", function () { pm.expect(j.tipo).to.eql("Vidro"); pm.expect(j.destinacao).to.eql("Aterro"); });
+    language: text/javascript
+order: 8000

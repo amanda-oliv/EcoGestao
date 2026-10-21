@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/api/dashboard/consumo-por-setor"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 200", function () { pm.response.to.have.status(200); });
+      pm.test("Resposta é uma lista", function () { pm.expect(pm.response.json()).to.be.an("array"); });
+      pm.test("Itens por setor", function () { pm.response.json().forEach(function (i) { pm.expect(i).to.have.keys("setorId","setor","agua","energia","residuos"); }); });
+    language: text/javascript
+order: 9000

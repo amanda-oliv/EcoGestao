@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{baseUrl}}/api/energia"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "setor": { "id": {{setorId}} },
+      "data": "2026-10-01",
+      "quantidade": 150.00
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status 201", function () { pm.response.to.have.status(201); });
+      if (pm.response.code === 201) { pm.collectionVariables.set("energiaId", pm.response.json().id); }
+      pm.test("Quantidade gravada", function () { pm.expect(pm.response.json().quantidade).to.eql(150); });
+    language: text/javascript
+order: 1000
