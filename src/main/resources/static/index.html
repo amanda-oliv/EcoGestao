@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | EcoGestão</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-eco">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">EcoGestão</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="menu">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="agua.html">Água</a></li>
+          <li class="nav-item"><a class="nav-link" href="energia.html">Energia</a></li>
+          <li class="nav-item"><a class="nav-link" href="residuos.html">Resíduos</a></li>
+          <li class="nav-item"><a class="nav-link" href="setores.html">Setores</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div id="alertas"></div>
+
+  <main class="container my-4">
+    <div class="mb-4">
+      <h1 class="h3 mb-1">Dashboard</h1>
+      <p class="text-muted mb-0">Indicadores ambientais de água, energia e resíduos</p>
+    </div>
+
+    <!-- Filtros globais -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <form id="form-filtros" class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label for="filtro-setor" class="form-label">Setor</label>
+            <select class="form-select" id="filtro-setor"></select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="filtro-inicio" class="form-label">Data inicial</label>
+            <input type="date" class="form-control" id="filtro-inicio">
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="filtro-fim" class="form-label">Data final</label>
+            <input type="date" class="form-control" id="filtro-fim">
+          </div>
+          <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-eco flex-fill">Filtrar</button>
+            <button type="button" class="btn btn-outline-secondary" id="btn-limpar">Limpar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Cards de resumo -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="card card-resumo h-100" style="border-left: 4px solid #1e88e5;">
+          <div class="card-body">
+            <div class="text-muted small">Água consumida</div>
+            <div class="fs-4 fw-semibold" id="total-agua">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card card-resumo h-100" style="border-left: 4px solid #f9a825;">
+          <div class="card-body">
+            <div class="text-muted small">Energia consumida</div>
+            <div class="fs-4 fw-semibold" id="total-energia">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card card-resumo h-100" style="border-left: 4px solid #6d4c41;">
+          <div class="card-body">
+            <div class="text-muted small">Resíduos gerados</div>
+            <div class="fs-4 fw-semibold" id="total-residuos">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card card-resumo h-100" style="border-left: 4px solid #43a047;">
+          <div class="card-body">
+            <div class="text-muted small">Reciclagem</div>
+            <div class="fs-4 fw-semibold" id="percentual-reciclagem">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row g-4 mb-4">
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6 mb-1">Consumo de água por mês</h2>
+            <p class="text-muted small mb-2">Em litros</p>
+            <div class="grafico mt-2">
+              <canvas id="grafico-agua"></canvas>
+              <div class="grafico-msg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6 mb-1">Consumo de energia por mês</h2>
+            <p class="text-muted small mb-2">Em kWh</p>
+            <div class="grafico mt-2">
+              <canvas id="grafico-energia"></canvas>
+              <div class="grafico-msg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-lg-7">
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6 mb-1">Resíduos gerados por mês</h2>
+            <p class="text-muted small mb-2">Em kg</p>
+            <div class="grafico mt-2">
+              <canvas id="grafico-residuos"></canvas>
+              <div class="grafico-msg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6 mb-1">Resíduos reciclados</h2>
+            <p class="text-muted small mb-2">Reciclado e não reciclado (kg)</p>
+            <div class="grafico mt-2">
+              <canvas id="grafico-reciclagem"></canvas>
+              <div class="grafico-msg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-12">
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6 mb-1">Consumo por setor</h2>
+            <p class="text-muted small mb-2">Água em litros, energia em kWh e resíduos em kg. Mostra todos os setores, então aqui só vale o filtro de data.</p>
+            <div class="grafico mt-2" style="height: 320px;">
+              <canvas id="grafico-setores"></canvas>
+              <div class="grafico-msg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6 mb-1">Resíduos por tipo</h2>
+            <p class="text-muted small mb-2">Em kg</p>
+            <div class="grafico mt-2">
+              <canvas id="grafico-tipo"></canvas>
+              <div class="grafico-msg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6 mb-1">Resíduos por destinação</h2>
+            <p class="text-muted small mb-2">Em kg</p>
+            <div class="grafico mt-2">
+              <canvas id="grafico-destinacao"></canvas>
+              <div class="grafico-msg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparação entre períodos -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h2 class="h6 mb-1">Comparação entre períodos</h2>
+        <p class="text-muted small mb-3">Totais por mês de dois períodos diferentes. O setor é o mesmo escolhido no filtro de cima.</p>
+        <form id="form-comparacao" class="row g-3 align-items-end mb-3">
+          <div class="col-12 col-lg-2">
+            <label for="comp-modulo" class="form-label">Indicador</label>
+            <select class="form-select" id="comp-modulo">
+              <option value="agua">Água (litros)</option>
+              <option value="energia">Energia (kWh)</option>
+              <option value="residuos">Resíduos (kg)</option>
+            </select>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <label class="form-label">Período A</label>
+            <div class="input-group">
+              <input type="date" class="form-control" id="comp-a-inicio" aria-label="Início do período A">
+              <input type="date" class="form-control" id="comp-a-fim" aria-label="Fim do período A">
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-4">
+            <label class="form-label">Período B</label>
+            <div class="input-group">
+              <input type="date" class="form-control" id="comp-b-inicio" aria-label="Início do período B">
+              <input type="date" class="form-control" id="comp-b-fim" aria-label="Fim do período B">
+            </div>
+          </div>
+          <div class="col-12 col-lg-2">
+            <button type="submit" class="btn btn-eco w-100">Comparar</button>
+          </div>
+        </form>
+        <div class="grafico">
+          <canvas id="grafico-comparacao"></canvas>
+          <div class="grafico-msg"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

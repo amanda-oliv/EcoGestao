@@ -1,0 +1,80 @@
+:root {
+  --eco-verde: #2e7d32;
+  --eco-verde-escuro: #1b5e20;
+  --eco-fundo: #f4f7f4;
+}
+
+body {
+  background-color: var(--eco-fundo);
+}
+
+.navbar-eco {
+  background-color: var(--eco-verde);
+}
+
+.navbar-eco .nav-link.active {
+  font-weight: 600;
+  border-bottom: 2px solid #fff;
+}
+
+.btn-eco {
+  background-color: var(--eco-verde);
+  border-color: var(--eco-verde);
+  color: #fff;
+}
+
+.btn-eco:hover {
+  background-color: var(--eco-verde-escuro);
+  border-color: var(--eco-verde-escuro);
+  color: #fff;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+#alertas {
+  position: fixed;
+  top: 70px;
+  right: 16px;
+  z-index: 1080;
+  max-width: 380px;
+}
+
+.estado-vazio {
+  text-align: center;
+  color: #6c757d;
+  padding: 2rem 0;
+}
+
+/* ---------- Dashboard ---------- */
+
+.grafico {
+  position: relative;
+  height: 260px;
+}
+
+/* Mensagem por cima do gráfico: carregando, sem dados ou erro */
+.grafico-msg {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #6c757d;
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+}
+
+.grafico[data-estado="carregando"] .grafico-msg,
+.grafico[data-estado="vazio"] .grafico-msg,
+.grafico[data-estado="erro"] .grafico-msg,
+.grafico[data-estado="aguardando"] .grafico-msg {
+  display: flex;
+}
+
+.grafico[data-estado="erro"] .grafico-msg {
+  color: #dc3545;
+}
